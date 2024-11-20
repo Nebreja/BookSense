@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/fontawesome.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <title>Analysis Results</title>
+    {% load static %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        #banner {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), #0C969C), url("{% static 'images/home.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+        }
+
+        .banner-text {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #fff;
+        }
+
+        .banner-text h1 {
+            font-size: 60px;
+            font-family: 'Kaushan Script', cursive;
+        }
+
+        .banner-text p {
+            font-size: 20px;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .fa-solid{
+            width: 50px;
+            height: 50px;
+            font-size: 30px;
+            line-height: 50px;
+            border-radius: 8px;
+            color: #fff;
+            padding-top: 20px;
+            padding-left: 50px;
+        }
+
+        /* Main Content Styles */
+        .content-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+
+        h2 {
+            color: #0C969C;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Ensures equal column width */
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            color: #0A7075;
+        }
+
+        td {
+            background-color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Button Styles */
+        .back-btn {
+            display: inline-block;
+            background-color: #0C969C;
+            padding: 10px 20px;
+            color: white;
+            font-size: 18px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #009688;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination a {
+            padding: 10px 20px;
+            margin: 0 5px;
+            text-decoration: none;
+            background-color: #0C969C;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .pagination a:hover {
+            background-color: #0A7075;
+        }
+        .pagination .disabled {
+            background-color: #0C969C;
+            cursor: not-allowed;
+        }
+        .pagenum{
+            margin-top: 10px;
+        }
+
+        /* Mobile Responsiveness */
+        @media screen and (max-width: 770px) {
+            #banner h1 {
+                font-size: 40px;
+            }
+            #banner p {
+                font-size: 16px;
+            }
+            .content-container {
+                padding: 15px;
+            }
+            table th, table td {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="banner">
+        <a href="{% url 'file_upload' %}">
+            <i class="fa-solid fa-left-long" class="back"></i>
+        </a>
+        <div class="banner-text">
+            <h1>Analysis Results</h1>
+        </div>
+
+        <div class="content-container">
+            <!-- Display results if any explicit words detected -->
+            {% if analysis_result %}
+                <h2>Explicit Words Detected:</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Language</th>
+                            <th>Word</th>
+                            <th>Age Suitability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in analysis_result %}
+                            <tr>
+                                <td>{{ entry.category }}</td>
+                                <td>{{ entry.language }}</td>
+                                <td>{{ entry.word }}</td>
+                                <td>{{ entry.age_suitability }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    
+                <!-- Pagination for analysis_result -->
+                <div class="pagination">
+                    {% if analysis_result.has_previous %}
+                        <a href="?page=1">&laquo; First</a>
+                        <a href="?page={{ analysis_result.previous_page_number }}">Previous</a>
+                    {% else %}
+                        <a class="disabled">First</a>
+                        <a class="disabled">Previous</a>
+                    {% endif %}
+    
+                    <span class="pagenum">Page {{ analysis_result.number }} of {{ analysis_result.paginator.num_pages }}</span>
+    
+                    {% if analysis_result.has_next %}
+                        <a href="?page={{ analysis_result.next_page_number }}">Next</a>
+                        <a href="?page={{ analysis_result.paginator.num_pages }}">Last &raquo;</a>
+                    {% else %}
+                        <a class="disabled">Next</a>
+                        <a class="disabled">Last</a>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p>No explicit words detected.</p>
+            {% endif %}
+        
+            <!-- Display CSV data if available -->
+            {% if data %}
+                <h2>CSV Data:</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Language</th>
+                            <th>Word</th>
+                            <th>Age Suitability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in data %}
+                            <tr>
+                                <td>{{ entry.Category }}</td>
+                                <td>{{ entry.Language }}</td>
+                                <td>{{ entry.Word }}</td>
+                                <td>{{ entry.Age_Suitability }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    
+                <!-- Pagination for CSV data -->
+                <div class="pagination">
+                    {% if data.has_previous %}
+                        <a href="?csv_page=1">&laquo; First</a>
+                        <a href="?csv_page={{ data.previous_page_number }}">Previous</a>
+                    {% else %}
+                        <a class="disabled">First</a>
+                        <a class="disabled">Previous</a>
+                    {% endif %}
+    
+                    <span>Page {{ data.number }} of {{ data.paginator.num_pages }}</span>
+    
+                    {% if data.has_next %}
+                        <a href="?csv_page={{ data.next_page_number }}">Next</a>
+                        <a href="?csv_page={{ data.paginator.num_pages }}">Last &raquo;</a>
+                    {% else %}
+                        <a class="disabled">Next</a>
+                        <a class="disabled">Last</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
