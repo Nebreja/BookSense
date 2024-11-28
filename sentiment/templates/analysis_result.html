@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result</title>
+</head>
+<body>
+    <h1>Analysis Result for: {{ uploaded_file.file.name }}</h1>
+    
+    <p><strong>Date Uploaded:</strong> {{ uploaded_file.uploaded_at }}</p>
+    <p><strong>Analysis Result:</strong></p>
+
+    <pre>{{ uploaded_file.analysis_result }}</pre>
+    
+    
+    <a href="{% url 'user_files' %}">Back to your uploaded files</a>
+</body>
+</html>

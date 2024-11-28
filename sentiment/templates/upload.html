@@ -114,6 +114,13 @@
             padding-top: 20px;
             padding-left: 50px;
         }
+        .right-icon {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            font-size: 30px; /* Adjust size as needed */
+            color: white; /* Optional: adjust icon color */
+}
 
         /* Mobile Responsiveness */
         @media screen and (max-width: 770px) {
@@ -142,8 +149,11 @@
 </head>
 <body>
     <div id="banner">
-        <a href="{% url 'home' %}">
+        <a href="{% url 'logout' %}">
             <i class="fa-solid fa-left-long" class="back"></i>
+        </a>
+        <a href="{% url 'user_files' %}" class="right-icon">
+            <i class="fa-solid fa-clock-rotate-left"></i>
         </a>
         <div class="banner-text">
             <h1>BookSense</h1>

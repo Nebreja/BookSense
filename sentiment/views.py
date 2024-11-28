@@ -7,11 +7,83 @@ import os
 import fitz
 import re
 from django.core.paginator import Paginator
+from django.shortcuts import render, redirect
+from .models import User
+from django.contrib.auth.hashers import make_password
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from django.shortcuts import render, redirect
 
-from django.shortcuts import render
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+@login_required
+def delete_uploaded_file(request, file_id):
+    # Fetch the file to be deleted, ensuring it's associated with the logged-in user
+    uploaded_file = get_object_or_404(UploadedFile, id=file_id, user=request.user)
+    
+    # Delete the file from the file system
+    uploaded_file.file.delete()
+    
+    # Delete the record from the database
+    uploaded_file.delete()
+
+    # Redirect back to the user files page
+    return redirect('user_files')
 
 def home_view(request):
     return render(request, "home.html")
+
+def user_uploaded_files(request):
+    files = request.user.uploaded_files.all()  # Access files uploaded by the logged-in user
+    return render(request, "user_files.html", {"files": files})
+
+
+def signup_view(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Check if the email already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists. Please use a different one.")
+            return render(request, 'signup.html')
+
+        # Save user to database with hashed password
+        user = User(email=email, password=make_password(password))
+        user.save()
+
+        messages.success(request, "Account created successfully! You can now sign in.")
+        return redirect('signin')  # Replace 'signin' with the name of your sign-in view
+
+    return render(request, 'signup.html')
+
+def signin_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        if not email or not password:
+            messages.error(request, "Both email and password are required.")
+            return render(request, 'signin.html')
+
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            messages.success(request, "")
+            return redirect('file_upload')
+        else:
+            messages.error(request, "Invalid email or password.")
+
+    return render(request, 'signin.html')
 
 # Path to the existing dataset
 dataset_file_path = 'D:/wamp64/www/Final_Project/explicit_words_dataset_with_age_suitability.csv'
@@ -25,11 +97,11 @@ def load_dataset():
 
 
 # View function for file upload and analysis
-# View function for file upload and analysis
+@login_required
 def file_upload_view(request):
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
-        uploaded_instance = UploadedFile(file=uploaded_file)
+        uploaded_instance = UploadedFile(file=uploaded_file, user=request.user)  # Associate with logged-in user
         uploaded_instance.save()
         uploaded_file_path = uploaded_instance.file.path
         
@@ -59,6 +131,10 @@ def file_upload_view(request):
         # Analyze the extracted text for inappropriate words
         analysis_result = check_suitability(extracted_text)
         
+        # Store the analysis result in the uploaded file instance
+        uploaded_instance.analysis_result = str(analysis_result)  # Save as a string
+        uploaded_instance.save()
+
         # Paginate analysis results
         paginator = Paginator(analysis_result, 10)  # Show 10 items per page
         page_number = request.GET.get('page')
@@ -68,6 +144,19 @@ def file_upload_view(request):
         return render(request, "result.html", {"analysis_result": page_obj})
 
     return render(request, "upload.html")
+
+@login_required
+def view_analysis_result(request, file_id):
+    # Fetch the uploaded file using the file_id
+    uploaded_file = get_object_or_404(UploadedFile, id=file_id, user=request.user)
+    
+    # Check if the analysis result exists
+    if not uploaded_file.analysis_result:
+        return HttpResponse("No analysis result available for this file.", status=404)
+
+    # Render the result page with the analysis result
+    return render(request, "analysis_result.html", {"uploaded_file": uploaded_file})
+
 
 def check_suitability(extracted_text):
     dataset = load_dataset()

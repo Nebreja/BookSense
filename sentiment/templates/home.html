@@ -29,12 +29,25 @@
             background-position: center;
             height: 100vh;
         }
-        .logo{
+        .logo {
             width: 140px;
+            height: 140px;
             position: absolute;
             top: 4%;
             left: 10%;
+            border-radius: 80%; /* Creates a circular container */
+            overflow: hidden; /* Ensures the image doesn't overflow the circle */
+            display: flex; /* Centering with flexbox */
+            align-items: center;
+            justify-content: center;
         }
+
+        .logo img {
+            width: 100%; /* Ensure the image fills the width of the container */
+            height: 100%; /* Ensure the image fills the height of the container */
+            object-fit: cover; /* Ensures the image scales correctly without distortion */
+        }
+
         .banner-text{
             text-align: center;
             color: #fff;
@@ -232,8 +245,8 @@
             <h1>BookSense</h1>
             <p>Empowering Readers with Age-Appropriate Content Insights</p>
             <div class="banner-btn">
-                <a href="{% url 'file_upload' %}"><span></span>Find Out</a>
-                <a href=""><span></span>Read More</a>
+                <a href="{% url 'signup' %}"><span></span>Sign Up</a>
+                <a href="#about"><span></span>Read More</a>
             </div>
         </div>
     </section>
