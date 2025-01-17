@@ -10,5 +10,7 @@ Whether you are a parent ensuring the suitability of a book for your child, an e
 Together, we can build a future where literature continues to inspire, educate, and entertain while respecting the diverse needs of its audience. 
 Let BookSense be your trusted partner in navigating the ever-evolving world of books.
 
+![Sample Output](sentiment/static/images/Screenshot (259).png)
+
 
                         
